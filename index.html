@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Agenda Conoflex</title>
+</head>
+
+<body>
+
+    <table>
+        <thead>
+            <tr>
+                <td id="columna-pedidos">
+                    <div id="caja-input-pedidos">
+                        <h1>PEDIDOS</h1>
+                        <form name="formularioPedidos" id="form-pedidos">
+                            <label id="label-cliente">Ingresá el cliente(*)</label>
+                            <br />
+                            <input type="text" name="cliente" id="input-cliente">
+                            <br /><br />
+                            <label id="label-fecha">Ingresá la fecha del pedido(*)</label>
+                            <br />
+                            <input type="date" name="fecha" id="input-fecha">
+                            <br /><br />
+                            <label id="label-orden">Ingresá el n° de orden</label>
+                            <br />
+                            <input type="number" name="orden" id="input-orden">
+                            <br /><br />
+                            <label id="label-cantidad">Ingresá la cantidad de artículos diferentes(*)</label>
+                            <br />
+                            <input type="number" name="cantidad" id="input-cantidad">
+                            <br /><br />
+                            <label id="label-articulos">Ingresá los artículos con sus cantidades(*)</label>
+                            <br />
+                            <textarea id="textarea-articulos"></textarea>
+                            <br /><br />
+                            <button type="submit" name="button" id="button-ingresar">INGRESAR PEDIDO</button>
+                        </form>
+                    </div>
+
+                    <div id="caja-pedidos">
+
+                    </div>
+                </td>
+                <td id="columna-facturados">
+                    <h1>FACTURADOS</h1>
+
+                    <div id="caja-facturados">
+
+                    </div>
+                </td>
+                <td id="columna-ruta">
+                    <h1>RUTA</h1>
+                    <form id='form-ruta' name="form-ruta">
+                        <label id='label-fecha-ruta'>Ingresá la fecha de salida del camión</label>
+                        <input type="date" name="fechaRuta" id="input-fecha-ruta">
+                        <button type="submit" name="buttonRuta" id="button-ruta">CREAR RUTA</button>
+                    </form>
+                    <h3 id="salida-camion">SIGUIENTE RUTA:</h3>
+                    <table id="table">
+                        <tr>
+                            <th class="th-ruta">Cliente</td>
+                            <th class="th-ruta">Fecha del pedido</td>
+                            <th class="th-ruta">Transporte</th>
+                        </tr>
+                    </table>
+                    <table id="tabla-ruta" border="1">
+                        <tbody id='tbody-ruta'>                           
+                                <div id="div-ruta">
+
+                                </div>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </thead>
+    </table>
+
+
+
+    <script src="probandoPedidosyFacturados.js"></script>
+</body>
+
+</html>

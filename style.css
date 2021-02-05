@@ -1,0 +1,35 @@
+tr {
+    display: flex;
+}
+
+#columna-pedidos {
+    margin-right: 150px;
+}
+
+#columna-facturados {
+    margin-right: 150px;
+}
+
+.buttonFormularioArticulos, .labelFormularioArticulos, .inputFormularioArticulos {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+#tr-ruta {
+    width: 600px;
+    text-align: center;
+}
+
+.td-ruta {
+    width: 150px;
+    text-align: center;
+}
+
+.th-ruta {
+    width: 150px;
+    text-align: center;
+}
+
+#form-ruta {
+    margin-bottom: 15px;
+}
