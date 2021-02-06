@@ -32,7 +32,7 @@ $buttonAgregarPedido.onclick = function (e) {
             cantidad: $cantidad,
             estado: 'sinFacturar',
             articulos: $articulos,
-            pagado: 'NO',
+            pagado: false,
             ruta: false,
             transporte: ''
         }
@@ -145,9 +145,9 @@ function mostrarFacturados(facturados) {
         $p.textContent = `N° ORDEN: ${facturados[i].orden}`;
         $p2.textContent = `CANTIDAD ITEMS: ${facturados[i].cantidad}`;
         $p3.innerHTML = `ARTÍCULOS: <br/>${facturados[i].articulos}`;
-        $p4.textContent = `PAGADO: ${facturados[i].pagado}`;
+        $p4.textContent = `PAGADO: ${ facturados[i].pagado ? 'SÍ' : 'NO' }`;
         $p4.setAttribute('id', `pagado${i}`);
-        $buttonSinFacturar.textContent = 'SIN FACTURAR';
+        $buttonSinFacturar.textContent = 'NO FACTURADO';
         $buttonEliminar.textContent = 'ELIMINAR';
         $buttonPagado.textContent = 'PAGADO';
         $buttonNoPagado.textContent = 'NO PAGADO';
@@ -171,13 +171,13 @@ function mostrarFacturados(facturados) {
         eliminarFactura($buttonEliminar, facturados, i);
 
         $buttonPagado.onclick = function () {
-            facturados[i].pagado = 'SÍ';
+            facturados[i].pagado = true;
 
             mostrarFacturados(facturados);
         }
 
         $buttonNoPagado.onclick = function () {
-            facturados[i].pagado = 'NO';
+            facturados[i].pagado = false;
 
             mostrarFacturados(facturados);
         }
@@ -185,7 +185,7 @@ function mostrarFacturados(facturados) {
         //agregarARuta($buttonRuta, $tablaRuta, facturados, i, arrayRuta);
 
         pasarARuta(facturados, i, arrayRuta, $buttonRuta);
-        
+
 
         $cajaFacturados.appendChild($divFacturado);
 
@@ -261,8 +261,8 @@ function pasarARuta(facturados, i, arrayRuta, $buttonRuta) {
 
         if (facturados[i].ruta === false) {
 
-            if(facturados[i].pagado === 'NO'){
-                alert('Mirá que no pagó');
+            if (facturados[i].pagado !== true) {
+                alert('El cliente todavía no pagó');
             }
 
             const $transporte = prompt('Ingresá el transporte');
@@ -275,7 +275,7 @@ function pasarARuta(facturados, i, arrayRuta, $buttonRuta) {
 
             arrayRuta.push(facturados[i]);
 
-            mostrarRuta($tablaRuta, arrayRuta);
+            mostrarRuta($tablaRuta, arrayRuta, facturados);
 
             console.log(arrayRuta);
 
@@ -287,7 +287,7 @@ function pasarARuta(facturados, i, arrayRuta, $buttonRuta) {
 
 }
 
-function mostrarRuta($tablaRuta, arrayRuta) {
+function mostrarRuta($tablaRuta, arrayRuta, facturados) {
 
     $tablaRuta.innerHTML = '';
 
@@ -320,7 +320,7 @@ function mostrarRuta($tablaRuta, arrayRuta) {
 
         $tablaRuta.appendChild($nuevaFila);
 
-        eliminarDeRuta($buttonEliminar, arrayRuta, i);
+        eliminarDeRuta($buttonEliminar, arrayRuta, i, facturados);
 
         console.log('entrando a ruta')
 
@@ -328,11 +328,15 @@ function mostrarRuta($tablaRuta, arrayRuta) {
 
 }
 
-function eliminarDeRuta(botonEliminar, ruta, i) {
+function eliminarDeRuta(botonEliminar, ruta, i, facturados) {
 
     botonEliminar.onclick = function () {
 
+        facturados[i].ruta = false;
+        ruta[i].ruta = false;
+
         ruta.splice(i, 1);
+
         mostrarRuta($tablaRuta, ruta);
 
     }
