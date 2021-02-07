@@ -1,3 +1,6 @@
+var db = firebase.firestore();
+
+// PROJECT
 const $formulario = document.formularioPedidos;
 const $buttonAgregarPedido = $formulario.button;
 
@@ -6,6 +9,9 @@ const $cajaFacturados = document.querySelector('#caja-facturados');
 
 const arrayPedidos = [];
 const arrayFacturados = [];
+
+mostrarPedidos();
+mostrarFacturados();
 
 $buttonAgregarPedido.onclick = function (e) {
 
@@ -24,8 +30,11 @@ $buttonAgregarPedido.onclick = function (e) {
     if ($cliente === '' || $fecha === '' || $cantidad === '' || $articulos === '') {
         alert('TENÉS QUE INGRESAR TODOS LOS DATOS CON (*)');
     } else {
-        // creo el objeto y le asigno los datos
-        let pedido = {
+
+        $formulario.reset();
+
+        // firebase code
+        db.collection("pedidos").add({
             cliente: $cliente,
             fecha: $fecha,
             orden: $orden,
@@ -34,16 +43,18 @@ $buttonAgregarPedido.onclick = function (e) {
             articulos: $articulos,
             pagado: false,
             ruta: false,
-            transporte: ''
-        }
-
-        // agrego el objeto al array
-        arrayPedidos.push(pedido);
+            transporte: '',
+            id: Math.floor(Math.random() * 999999)
+        })
+            .then(function (docRef) {
+                console.log("Document written with ID: ", docRef.id);
+            })
+            .catch(function (error) {
+                console.error("Error adding document: ", error);
+            });
 
         // llamo a la función para que renderice cada objeto del array como un div diferente
-        mostrarPedidos(arrayPedidos);
-
-        console.log(arrayPedidos);
+        mostrarPedidos();
 
     }
 
@@ -51,72 +62,97 @@ $buttonAgregarPedido.onclick = function (e) {
 
 }
 
-function mostrarPedidos(pedidos) {
+function mostrarPedidos() {
 
     $cajaPedidos.innerHTML = '';
 
-    for (let i = 0; i < pedidos.length; i++) {
+    db.collection("pedidos").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
 
-        // por cada vuelta del for creo los elementos necesarios por cada pedido
-        const $divPedido = document.createElement('div');
-        const $h3 = document.createElement('h3');
-        const $h4 = document.createElement('h4');
-        const $p = document.createElement('p');
-        const $p2 = document.createElement('p');
-        const $p3 = document.createElement('p');
-        const $buttonFacturado = document.createElement('button');
-        const $buttonEliminar = document.createElement('button');
+            // por cada vuelta del for creo los elementos necesarios por cada pedido
+            const $divPedido = document.createElement('div');
+            const $h3 = document.createElement('h3');
+            const $h4 = document.createElement('h4');
+            const $p = document.createElement('p');
+            const $p2 = document.createElement('p');
+            const $p3 = document.createElement('p');
+            const $buttonFacturado = document.createElement('button');
+            const $buttonEliminar = document.createElement('button');
 
-        // saco los datos del objeto actual del array y se lo asigno a los elementos creados
-        $h3.textContent = `CLIENTE: ${pedidos[i].cliente}`;
-        $h4.textContent = `FECHA: ${pedidos[i].fecha}`;
-        $p.textContent = `N° ORDEN: ${pedidos[i].orden}`;
-        $p2.textContent = `CANTIDAD ITEMS: ${pedidos[i].cantidad}`;
-        $p3.innerHTML = `ARTÍCULOS: <br/>${pedidos[i].articulos}`;
-        //$p3.textContent = `ARTÍCULOS: ${pedidos[i].articulos}`;
+            // saco los datos del objeto actual del array y se lo asigno a los elementos creados
+            $h3.textContent = `CLIENTE: ${doc.data().cliente}`;
+            $h4.textContent = `FECHA: ${doc.data().fecha}`;
+            $p.textContent = `N° ORDEN: ${doc.data().orden}`;
+            $p2.textContent = `CANTIDAD ITEMS: ${doc.data().cantidad}`;
+            $p3.innerHTML = `ARTÍCULOS: <br/>${doc.data().articulos}`;
+            //$p3.textContent = `ARTÍCULOS: ${pedidos[i].articulos}`;
 
-        $buttonFacturado.textContent = 'FACTURADO';
-        $buttonEliminar.textContent = 'ELIMINAR';
+            $buttonFacturado.textContent = 'FACTURADO';
+            $buttonEliminar.textContent = 'ELIMINAR';
 
-        // meto todo dentro del div
-        $divPedido.appendChild($h3);
-        $divPedido.appendChild($h4);
-        $divPedido.appendChild($p);
-        $divPedido.appendChild($p2);
-        $divPedido.appendChild($p3);
-        $divPedido.appendChild($buttonFacturado);
-        $divPedido.appendChild($buttonEliminar);
+            // meto todo dentro del div
+            $divPedido.appendChild($h3);
+            $divPedido.appendChild($h4);
+            $divPedido.appendChild($p);
+            $divPedido.appendChild($p2);
+            $divPedido.appendChild($p3);
+            $divPedido.appendChild($buttonFacturado);
+            $divPedido.appendChild($buttonEliminar);
 
-        $divPedido.style = 'color: red';
+            $divPedido.style = 'color: red';
 
-        pasarAFacturados($buttonFacturado, arrayFacturados, pedidos, i);
-        eliminarPedido($buttonEliminar, pedidos, i);
+            pasarAFacturados($buttonFacturado, db.collection('facturados'), doc.data().id, doc.id);
+            /*
+            eliminarPedido($buttonEliminar, pedidos, i);
+            */
 
-        // meto el div dentro de la caja de pedidos
-        $cajaPedidos.appendChild($divPedido);
+            // meto el div dentro de la caja de pedidos
+            $cajaPedidos.appendChild($divPedido);
 
-    }
+            console.log(`${doc.id} => ${doc.data().cliente}`);
+        });
+    });
 
 }
 
-function pasarAFacturados(botonFacturado, facturados, pedidos, i) {
+function pasarAFacturados(botonFacturado, facturados, docData, docId) {
 
     // al clickear 'facturado'
     botonFacturado.onclick = function () {
 
+        db.collection("pedidos").where("id", "==", docData)
+            .get()
+            .then(function (querySnapshot) {
+                querySnapshot.forEach(function (doc) {
+                    // doc.data() is never undefined for query doc snapshots
+                    facturados.add(doc.data());
+                    mostrarPedidos();
+                    mostrarFacturados();
+
+                    db.collection("pedidos").doc(docId).delete().then(function () {
+                        console.log("Document successfully deleted!");
+                        mostrarPedidos();
+                        mostrarFacturados();
+                    }).catch(function (error) {
+                        console.error("Error removing document: ", error);
+                    });
+
+                });
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
+
+
         // agrego el objeto clickeado al array de facturados
-        facturados.push(pedidos[i]);
+
+        //console.log(docData);
+        //facturados.push(pedidos.data().id);
 
         // y lo saco del array de pedidos
-        pedidos.splice(i, 1);
+        //pedidos.splice(i, 1);
 
         //facturados[i].estado = 'facturado';
-
-        mostrarPedidos(pedidos);
-        mostrarFacturados(facturados);
-
-        console.log(facturados);
-        console.log(pedidos);
 
     }
 }
@@ -125,88 +161,103 @@ function mostrarFacturados(facturados) {
 
     $cajaFacturados.innerHTML = '';
 
-    for (let i = 0; i < facturados.length; i++) {
+    db.collection("facturados").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
 
-        const $divFacturado = document.createElement('div');
-        const $h3 = document.createElement('h3');
-        const $h4 = document.createElement('h4');
-        const $p = document.createElement('p');
-        const $p2 = document.createElement('p');
-        const $p3 = document.createElement('p');
-        const $buttonSinFacturar = document.createElement('button');
-        const $buttonEliminar = document.createElement('button');
-        const $buttonPagado = document.createElement('button');
-        const $buttonNoPagado = document.createElement('button');
-        const $buttonRuta = document.createElement('button');
-        const $p4 = document.createElement('p');
+            const $divFacturado = document.createElement('div');
+            const $h3 = document.createElement('h3');
+            const $h4 = document.createElement('h4');
+            const $p = document.createElement('p');
+            const $p2 = document.createElement('p');
+            const $p3 = document.createElement('p');
+            const $buttonSinFacturar = document.createElement('button');
+            const $buttonEliminar = document.createElement('button');
+            const $buttonPagado = document.createElement('button');
+            const $buttonNoPagado = document.createElement('button');
+            const $buttonRuta = document.createElement('button');
+            const $p4 = document.createElement('p');
 
-        $h3.textContent = `CLIENTE: ${facturados[i].cliente}`;
-        $h4.textContent = `FECHA: ${facturados[i].fecha}`;
-        $p.textContent = `N° ORDEN: ${facturados[i].orden}`;
-        $p2.textContent = `CANTIDAD ITEMS: ${facturados[i].cantidad}`;
-        $p3.innerHTML = `ARTÍCULOS: <br/>${facturados[i].articulos}`;
-        $p4.textContent = `PAGADO: ${ facturados[i].pagado ? 'SÍ' : 'NO' }`;
-        $p4.setAttribute('id', `pagado${i}`);
-        $buttonSinFacturar.textContent = 'NO FACTURADO';
-        $buttonEliminar.textContent = 'ELIMINAR';
-        $buttonPagado.textContent = 'PAGADO';
-        $buttonNoPagado.textContent = 'NO PAGADO';
-        $buttonRuta.textContent = 'A LA RUTA'
+            $h3.textContent = `CLIENTE: ${doc.data().cliente}`;
+            $h4.textContent = `FECHA: ${doc.data().fecha}`;
+            $p.textContent = `N° ORDEN: ${doc.data().orden}`;
+            $p2.textContent = `CANTIDAD ITEMS: ${doc.data().cantidad}`;
+            $p3.innerHTML = `ARTÍCULOS: <br/>${doc.data().articulos}`;
+            $p4.textContent = `PAGADO: ${doc.data().pagado ? 'SÍ' : 'NO'}`;
+            $p4.setAttribute('id', `pagado${doc.data().id}`);
+            $buttonSinFacturar.textContent = 'NO FACTURADO';
+            $buttonEliminar.textContent = 'ELIMINAR';
+            $buttonPagado.textContent = 'PAGADO';
+            $buttonNoPagado.textContent = 'NO PAGADO';
+            $buttonRuta.textContent = 'A LA RUTA'
 
-        $divFacturado.appendChild($h3);
-        $divFacturado.appendChild($h4);
-        $divFacturado.appendChild($p);
-        $divFacturado.appendChild($p2);
-        $divFacturado.appendChild($p3);
-        $divFacturado.appendChild($p4);
-        $divFacturado.appendChild($buttonSinFacturar);
-        $divFacturado.appendChild($buttonEliminar);
-        $divFacturado.appendChild($buttonPagado);
-        $divFacturado.appendChild($buttonNoPagado);
-        $divFacturado.appendChild($buttonRuta);
+            $divFacturado.appendChild($h3);
+            $divFacturado.appendChild($h4);
+            $divFacturado.appendChild($p);
+            $divFacturado.appendChild($p2);
+            $divFacturado.appendChild($p3);
+            $divFacturado.appendChild($p4);
+            $divFacturado.appendChild($buttonSinFacturar);
+            $divFacturado.appendChild($buttonEliminar);
+            $divFacturado.appendChild($buttonPagado);
+            $divFacturado.appendChild($buttonNoPagado);
+            $divFacturado.appendChild($buttonRuta);
 
-        $divFacturado.style = 'color: green';
+            $divFacturado.style = 'color: green';
 
-        pasarAPedidos($buttonSinFacturar, facturados, arrayPedidos, i);
-        eliminarFactura($buttonEliminar, facturados, i);
+            pasarAPedidos($buttonSinFacturar, db.collection('pedidos'), doc.data().id, doc.id);
+            eliminarFactura($buttonEliminar, facturados, doc.data().id);
 
-        $buttonPagado.onclick = function () {
-            facturados[i].pagado = true;
+            $buttonPagado.onclick = function () {
+                doc.data().pagado = true;
 
-            mostrarFacturados(facturados);
-        }
+                mostrarFacturados(facturados);
+            }
 
-        $buttonNoPagado.onclick = function () {
-            facturados[i].pagado = false;
+            $buttonNoPagado.onclick = function () {
+                doc.data().pagado = false;
 
-            mostrarFacturados(facturados);
-        }
+                mostrarFacturados(facturados);
+            }
 
-        //agregarARuta($buttonRuta, $tablaRuta, facturados, i, arrayRuta);
+            //agregarARuta($buttonRuta, $tablaRuta, facturados, i, arrayRuta);
 
-        pasarARuta(facturados, i, arrayRuta, $buttonRuta);
+            pasarARuta(facturados, doc.data().id, arrayRuta, $buttonRuta);
 
 
-        $cajaFacturados.appendChild($divFacturado);
+            $cajaFacturados.appendChild($divFacturado);
 
-    }
+            console.log(`${doc.id} => ${doc.data().cliente}`);
+        });
+    });
 
 }
 
-function pasarAPedidos(botonSinFacturar, facturados, pedidos, i) {
+function pasarAPedidos(botonSinFacturar, pedidos, docData, docId) {
 
     botonSinFacturar.onclick = function () {
 
-        pedidos.push(facturados[i]);
-        facturados.splice(i, 1);
-
-        //pedidos[i].estado = 'sinFacturar';
-
-        mostrarFacturados(facturados);
-        mostrarPedidos(pedidos);
-
-        console.log(facturados);
-        console.log(pedidos);
+            db.collection("facturados").where("id", "==", docData)
+                .get()
+                .then(function (querySnapshot) {
+                    querySnapshot.forEach(function (doc) {
+                        // doc.data() is never undefined for query doc snapshots
+                        pedidos.add(doc.data());
+                        mostrarPedidos();
+                        mostrarFacturados();
+    
+                        db.collection("facturados").doc(docId).delete().then(function () {
+                            console.log("Document successfully deleted!");
+                            mostrarPedidos();
+                            mostrarFacturados();
+                        }).catch(function (error) {
+                            console.error("Error removing document: ", error);
+                        });
+    
+                    });
+                })
+                .catch(function (error) {
+                    console.log("Error getting documents: ", error);
+                });
     }
 
 }
