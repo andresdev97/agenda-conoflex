@@ -102,9 +102,7 @@ function mostrarPedidos() {
             $divPedido.style = 'color: red';
 
             pasarAFacturados($buttonFacturado, db.collection('facturados'), doc.data().id, doc.id);
-            /*
-            eliminarPedido($buttonEliminar, pedidos, i);
-            */
+            eliminarPedido($buttonEliminar, doc.id);
 
             // meto el div dentro de la caja de pedidos
             $cajaPedidos.appendChild($divPedido);
@@ -205,18 +203,42 @@ function mostrarFacturados(facturados) {
             $divFacturado.style = 'color: green';
 
             pasarAPedidos($buttonSinFacturar, db.collection('pedidos'), doc.data().id, doc.id);
-            eliminarFactura($buttonEliminar, facturados, doc.data().id);
+            eliminarFactura($buttonEliminar, doc.id);
 
             $buttonPagado.onclick = function () {
-                doc.data().pagado = true;
 
-                mostrarFacturados(facturados);
+                var documentoSeleccionado = db.collection("facturados").doc(doc.id);
+
+                // Set the "capital" field of the city 'DC'
+                return documentoSeleccionado.update({
+                    pagado: true
+                })
+                    .then(function () {
+                        mostrarFacturados();
+                        console.log("Document successfully updated!");
+                    })
+                    .catch(function (error) {
+                        // The document probably doesn't exist.
+                        console.error("Error updating document: ", error);
+                    });
+
             }
 
             $buttonNoPagado.onclick = function () {
-                doc.data().pagado = false;
+                var documentoSeleccionado = db.collection("facturados").doc(doc.id);
 
-                mostrarFacturados(facturados);
+                // Set the "capital" field of the city 'DC'
+                return documentoSeleccionado.update({
+                    pagado: false
+                })
+                    .then(function () {
+                        mostrarFacturados();
+                        console.log("Document successfully updated!");
+                    })
+                    .catch(function (error) {
+                        // The document probably doesn't exist.
+                        console.error("Error updating document: ", error);
+                    });
             }
 
             //agregarARuta($buttonRuta, $tablaRuta, facturados, i, arrayRuta);
@@ -236,52 +258,58 @@ function pasarAPedidos(botonSinFacturar, pedidos, docData, docId) {
 
     botonSinFacturar.onclick = function () {
 
-            db.collection("facturados").where("id", "==", docData)
-                .get()
-                .then(function (querySnapshot) {
-                    querySnapshot.forEach(function (doc) {
-                        // doc.data() is never undefined for query doc snapshots
-                        pedidos.add(doc.data());
+        db.collection("facturados").where("id", "==", docData)
+            .get()
+            .then(function (querySnapshot) {
+                querySnapshot.forEach(function (doc) {
+                    // doc.data() is never undefined for query doc snapshots
+                    pedidos.add(doc.data());
+                    mostrarPedidos();
+                    mostrarFacturados();
+
+                    db.collection("facturados").doc(docId).delete().then(function () {
+                        console.log("Document successfully deleted!");
                         mostrarPedidos();
                         mostrarFacturados();
-    
-                        db.collection("facturados").doc(docId).delete().then(function () {
-                            console.log("Document successfully deleted!");
-                            mostrarPedidos();
-                            mostrarFacturados();
-                        }).catch(function (error) {
-                            console.error("Error removing document: ", error);
-                        });
-    
+                    }).catch(function (error) {
+                        console.error("Error removing document: ", error);
                     });
-                })
-                .catch(function (error) {
-                    console.log("Error getting documents: ", error);
+
                 });
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
     }
 
 }
 
-function eliminarPedido(botonEliminar, pedidos, i) {
+function eliminarPedido(botonEliminar, docId) {
 
     botonEliminar.onclick = function () {
 
-        pedidos.splice(i, 1);
-        mostrarPedidos(pedidos);
-
-        console.log(pedidos);
+        db.collection("pedidos").doc(docId).delete().then(function () {
+            console.log("Document successfully deleted!");
+            mostrarPedidos();
+            mostrarFacturados();
+        }).catch(function (error) {
+            console.error("Error removing document: ", error);
+        });
     }
 
 }
 
-function eliminarFactura(botonEliminar, facturados, i) {
+function eliminarFactura(botonEliminar, docId) {
 
     botonEliminar.onclick = function () {
 
-        facturados.splice(i, 1);
-        mostrarFacturados(facturados);
-
-        console.log(facturados);
+        db.collection("facturados").doc(docId).delete().then(function () {
+            console.log("Document successfully deleted!");
+            mostrarPedidos();
+            mostrarFacturados();
+        }).catch(function (error) {
+            console.error("Error removing document: ", error);
+        });
     }
 
 }
@@ -298,13 +326,48 @@ const $tablaRuta = document.querySelector('#tbody-ruta');
 
 const arrayRuta = [];
 
+db.collection("fecha_ruta").get().then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+        $salidaCamion.textContent = `SIGUIENTE RUTA: ${doc.data().fechaRuta}`;
+        console.log("Document successfully loaded!");
+    })
+
+});
+
 $buttonFormRuta.onclick = function (e) {
 
-    $salidaCamion.textContent = `SIGUIENTE RUTA: ${$fechaRuta.value}`;
+    db.collection("fecha_ruta").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
 
-    e.preventDefault();
+            var documentoSeleccionado = db.collection("fecha_ruta").doc(doc.id);
 
+            // Set the "capital" field of the city 'DC'
+            return documentoSeleccionado.update({
+                fechaRuta: $fechaRuta.value
+            })
+                .then(function () {
+                    $salidaCamion.textContent = `SIGUIENTE RUTA: ${doc.data().fechaRuta}`;
+                    db.collection("fecha_ruta").get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            $salidaCamion.textContent = `SIGUIENTE RUTA: ${doc.data().fechaRuta}`;
+                            console.log("Document successfully loaded!");
+                        })
+                    
+                    });
+                    console.log("Document successfully updated!");
+                })
+                .catch(function (error) {
+                    // The document probably doesn't exist.
+                    console.error("Error updating document: ", error);
+                });
+
+        });
+
+    },
+        e.preventDefault()
+    );
 }
+
 
 function pasarARuta(facturados, i, arrayRuta, $buttonRuta) {
 
