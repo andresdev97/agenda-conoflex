@@ -141,21 +141,10 @@ function pasarAFacturados(botonFacturado, facturados, docData, docId) {
                 console.log("Error getting documents: ", error);
             });
 
-
-        // agrego el objeto clickeado al array de facturados
-
-        //console.log(docData);
-        //facturados.push(pedidos.data().id);
-
-        // y lo saco del array de pedidos
-        //pedidos.splice(i, 1);
-
-        //facturados[i].estado = 'facturado';
-
     }
 }
 
-function mostrarFacturados(facturados) {
+function mostrarFacturados() {
 
     $cajaFacturados.innerHTML = '';
 
@@ -241,10 +230,11 @@ function mostrarFacturados(facturados) {
                     });
             }
 
-            //agregarARuta($buttonRuta, $tablaRuta, facturados, i, arrayRuta);
-
-            pasarARuta(facturados, doc.data().id, arrayRuta, $buttonRuta);
-
+            if (doc.data().ruta === true) {
+                alert('El pedido ya está en ruta');
+            } else {
+                pasarARuta(doc.data().id, $buttonRuta, doc.data());
+            }
 
             $cajaFacturados.appendChild($divFacturado);
 
@@ -325,6 +315,7 @@ const $divRuta = document.querySelector('#div-ruta');
 const $tablaRuta = document.querySelector('#tbody-ruta');
 
 const arrayRuta = [];
+mostrarRuta($tablaRuta);
 
 db.collection("fecha_ruta").get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
@@ -341,7 +332,6 @@ $buttonFormRuta.onclick = function (e) {
 
             var documentoSeleccionado = db.collection("fecha_ruta").doc(doc.id);
 
-            // Set the "capital" field of the city 'DC'
             return documentoSeleccionado.update({
                 fechaRuta: $fechaRuta.value
             })
@@ -352,7 +342,7 @@ $buttonFormRuta.onclick = function (e) {
                             $salidaCamion.textContent = `SIGUIENTE RUTA: ${doc.data().fechaRuta}`;
                             console.log("Document successfully loaded!");
                         })
-                    
+
                     });
                     console.log("Document successfully updated!");
                 })
@@ -369,90 +359,93 @@ $buttonFormRuta.onclick = function (e) {
 }
 
 
-function pasarARuta(facturados, i, arrayRuta, $buttonRuta) {
+function pasarARuta(docData, $buttonRuta, docId) {
 
     $buttonRuta.onclick = function () {
 
-        if (facturados[i].ruta === false) {
+        db.collection("facturados").where("id", "==", docData)
+            .get()
+            .then(function (querySnapshot) {
+                querySnapshot.forEach(function (doc) {
+                    // doc.data() is never undefined for query doc snapshots
 
-            if (facturados[i].pagado !== true) {
-                alert('El cliente todavía no pagó');
-            }
+                    db.collection("ruta").add({
+                        cliente: doc.data().cliente,
+                        fecha: doc.data().fecha,
+                        transporte: prompt('Ingresá el transporte'),
+                        ruta: true,
+                        id: doc.data().id
+                    })
+                        .then(function (docRef) {
+                            console.log("Document written with ID: ", docRef.id);
+                        })
+                        .catch(function (error) {
+                            console.error("Error adding document: ", error);
+                        });
+                    mostrarRuta($tablaRuta);
+                    console.log('hola');
 
-            const $transporte = prompt('Ingresá el transporte');
-
-            facturados[i].transporte = $transporte;
-
-            $divRuta.innerHTML = '';
-
-            facturados[i].ruta = true;
-
-            arrayRuta.push(facturados[i]);
-
-            mostrarRuta($tablaRuta, arrayRuta, facturados);
-
-            console.log(arrayRuta);
-
-        } else {
-            alert('El pedido ya está en ruta');
-        }
+                });
+            })
+            .catch(function (error) {
+                console.log("Error getting documents: ", error);
+            });
 
     }
 
 }
 
-function mostrarRuta($tablaRuta, arrayRuta, facturados) {
+function mostrarRuta($tablaRuta) {
 
     $tablaRuta.innerHTML = '';
 
-    for (let i = 0; i < arrayRuta.length; i++) {
+    db.collection("ruta").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
 
-        const $nuevaFila = document.createElement('tr');
-        $nuevaFila.setAttribute('id', 'tr-ruta');
-        const $tdCliente = document.createElement('td');
-        $tdCliente.className = 'td-ruta';
-        const $tdFecha = document.createElement('td');
-        $tdFecha.className = 'td-ruta';
-        const $tdTransporte = document.createElement('td');
-        $tdTransporte.className = 'td-ruta';
-        const $buttonEliminar = document.createElement('button');
-        $buttonEliminar.className = 'td-ruta';
+            const $nuevaFila = document.createElement('tr');
+            $nuevaFila.setAttribute('id', 'tr-ruta');
+            const $tdCliente = document.createElement('td');
+            $tdCliente.className = 'td-ruta';
+            const $tdFecha = document.createElement('td');
+            $tdFecha.className = 'td-ruta';
+            const $tdTransporte = document.createElement('td');
+            $tdTransporte.className = 'td-ruta';
+            const $buttonEliminar = document.createElement('button');
+            $buttonEliminar.className = 'td-ruta';
 
-        const nombreCliente = arrayRuta[i].cliente;
-        const fecha = arrayRuta[i].fecha;
-        const transporte = arrayRuta[i].transporte;
+            const nombreCliente = doc.data().cliente;
+            const fecha = doc.data().fecha;
+            const transporte = doc.data().transporte;
 
-        $tdCliente.textContent = nombreCliente;
-        $tdFecha.textContent = fecha;
-        $tdTransporte.textContent = transporte;
-        $buttonEliminar.textContent = 'ELIMINAR';
+            $tdCliente.textContent = nombreCliente;
+            $tdFecha.textContent = fecha;
+            $tdTransporte.textContent = transporte;
+            $buttonEliminar.textContent = 'ELIMINAR';
 
-        $nuevaFila.appendChild($tdCliente);
-        $nuevaFila.appendChild($tdFecha);
-        $nuevaFila.appendChild($tdTransporte);
-        $nuevaFila.appendChild($buttonEliminar);
+            $nuevaFila.appendChild($tdCliente);
+            $nuevaFila.appendChild($tdFecha);
+            $nuevaFila.appendChild($tdTransporte);
+            $nuevaFila.appendChild($buttonEliminar);
 
-        $tablaRuta.appendChild($nuevaFila);
+            $tablaRuta.appendChild($nuevaFila);
 
-        eliminarDeRuta($buttonEliminar, arrayRuta, i, facturados);
+            eliminarDeRuta($buttonEliminar, doc.id);
 
-        console.log('entrando a ruta')
-
-    }
+        });
+    });
 
 }
 
-function eliminarDeRuta(botonEliminar, ruta, i, facturados) {
+function eliminarDeRuta(botonEliminar, docId) {
 
     botonEliminar.onclick = function () {
 
-        facturados[i].ruta = false;
-        ruta[i].ruta = false;
-
-        ruta.splice(i, 1);
-
-        mostrarRuta($tablaRuta, ruta);
-
+        db.collection("ruta").doc(docId).delete().then(function () {
+            console.log("Document successfully deleted!");
+            mostrarRuta($tablaRuta);
+        }).catch(function (error) {
+            console.error("Error removing document: ", error);
+        });
     }
 
 }
