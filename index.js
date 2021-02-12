@@ -230,11 +230,7 @@ function mostrarFacturados() {
                     });
             }
 
-            if (doc.data().ruta === true) {
-                alert('El pedido ya está en ruta');
-            } else {
-                pasarARuta(doc.data().id, $buttonRuta, doc.data());
-            }
+            pasarARuta(doc.data().id, $buttonRuta, doc.data());
 
             $cajaFacturados.appendChild($divFacturado);
 
