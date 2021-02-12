@@ -71,8 +71,8 @@ function mostrarPedidos() {
 
             // por cada vuelta del for creo los elementos necesarios por cada pedido
             const $divPedido = document.createElement('div');
-            const $h3 = document.createElement('h3');
             const $h4 = document.createElement('h4');
+            const $h5 = document.createElement('h5');
             const $p = document.createElement('p');
             const $p2 = document.createElement('p');
             const $p3 = document.createElement('p');
@@ -80,8 +80,8 @@ function mostrarPedidos() {
             const $buttonEliminar = document.createElement('button');
 
             // saco los datos del objeto actual del array y se lo asigno a los elementos creados
-            $h3.textContent = `CLIENTE: ${doc.data().cliente}`;
-            $h4.textContent = `FECHA: ${doc.data().fecha}`;
+            $h4.textContent = `CLIENTE: ${doc.data().cliente}`;
+            $h5.textContent = `FECHA: ${doc.data().fecha}`;
             $p.textContent = `N° ORDEN: ${doc.data().orden}`;
             $p2.textContent = `CANTIDAD ITEMS: ${doc.data().cantidad}`;
             $p3.innerHTML = `ARTÍCULOS: <br/>${doc.data().articulos}`;
@@ -91,8 +91,8 @@ function mostrarPedidos() {
             $buttonEliminar.textContent = 'ELIMINAR';
 
             // meto todo dentro del div
-            $divPedido.appendChild($h3);
             $divPedido.appendChild($h4);
+            $divPedido.appendChild($h5);
             $divPedido.appendChild($p);
             $divPedido.appendChild($p2);
             $divPedido.appendChild($p3);
@@ -100,6 +100,7 @@ function mostrarPedidos() {
             $divPedido.appendChild($buttonEliminar);
 
             $divPedido.style = 'color: red';
+            $divPedido.className = 'card';
 
             pasarAFacturados($buttonFacturado, db.collection('facturados'), doc.data().id, doc.id);
             eliminarPedido($buttonEliminar, doc.id);
@@ -152,8 +153,8 @@ function mostrarFacturados() {
         querySnapshot.forEach((doc) => {
 
             const $divFacturado = document.createElement('div');
-            const $h3 = document.createElement('h3');
             const $h4 = document.createElement('h4');
+            const $h5 = document.createElement('h5');
             const $p = document.createElement('p');
             const $p2 = document.createElement('p');
             const $p3 = document.createElement('p');
@@ -164,8 +165,8 @@ function mostrarFacturados() {
             const $buttonRuta = document.createElement('button');
             const $p4 = document.createElement('p');
 
-            $h3.textContent = `CLIENTE: ${doc.data().cliente}`;
-            $h4.textContent = `FECHA: ${doc.data().fecha}`;
+            $h4.textContent = `CLIENTE: ${doc.data().cliente}`;
+            $h5.textContent = `FECHA: ${doc.data().fecha}`;
             $p.textContent = `N° ORDEN: ${doc.data().orden}`;
             $p2.textContent = `CANTIDAD ITEMS: ${doc.data().cantidad}`;
             $p3.innerHTML = `ARTÍCULOS: <br/>${doc.data().articulos}`;
@@ -177,8 +178,8 @@ function mostrarFacturados() {
             $buttonNoPagado.textContent = 'NO PAGADO';
             $buttonRuta.textContent = 'A LA RUTA'
 
-            $divFacturado.appendChild($h3);
             $divFacturado.appendChild($h4);
+            $divFacturado.appendChild($h5);
             $divFacturado.appendChild($p);
             $divFacturado.appendChild($p2);
             $divFacturado.appendChild($p3);
@@ -190,6 +191,7 @@ function mostrarFacturados() {
             $divFacturado.appendChild($buttonRuta);
 
             $divFacturado.style = 'color: green';
+            $divFacturado.className = 'card mb-3';
 
             pasarAPedidos($buttonSinFacturar, db.collection('pedidos'), doc.data().id, doc.id);
             eliminarFactura($buttonEliminar, doc.id);

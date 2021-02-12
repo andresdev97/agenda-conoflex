@@ -4,18 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
     <title>Agenda Conoflex</title>
 </head>
 
 <body>
 
-    <table>
+    <table id="tabla-principal" class="container">
         <thead>
             <tr>
-                <td id="columna-pedidos">
+                <td id="columna-pedidos" class="col-md-3">
                     <div id="caja-input-pedidos">
-                        <h1>PEDIDOS</h1>
+                        <h2>PEDIDOS</h2>
                         <form name="formularioPedidos" id="form-pedidos">
                             <label id="label-cliente">Ingresá el cliente(*)</label>
                             <br />
@@ -45,21 +46,21 @@
 
                     </div>
                 </td>
-                <td id="columna-facturados">
-                    <h1>FACTURADOS</h1>
+                <td id="columna-facturados" class="col-md-3">
+                    <h2>FACTURADOS</h2>
 
                     <div id="caja-facturados">
 
                     </div>
                 </td>
-                <td id="columna-ruta">
-                    <h1>RUTA</h1>
+                <td id="columna-ruta" class="col-md-3">
+                    <h2>RUTA</h2>
                     <form id='form-ruta' name="form-ruta">
                         <label id='label-fecha-ruta'>Ingresá la fecha de salida del camión</label>
                         <input type="date" name="fechaRuta" id="input-fecha-ruta">
                         <button type="submit" name="buttonRuta" id="button-ruta">CREAR RUTA</button>
                     </form>
-                    <h3 id="salida-camion">SIGUIENTE RUTA:</h3>
+                    <h5 id="salida-camion">SIGUIENTE RUTA:</h3>
                     <table id="table">
                         <tr>
                             <th class="th-ruta">Cliente
